@@ -1,0 +1,52 @@
+#!/bin/bash
+# ========================================================
+# btail: a script for finding the last n lines of the 
+#        outputs of `bpeek`
+# Author: Di Wu
+# E-mail: d.wu93@aliyun.com
+# GitHub: https://github.com/diwu93
+# Version: 0.1
+# Last Modified: Jun 26, 2019
+# ========================================================
+
+bTEMP=`getopt -o n:fq:m:J:hV -- "$@"`
+
+eval set -- "$bTEMP"
+
+ShowHelp(){
+   echo 'Usage: btail [-f] [-q queue_name | -m host_name | -J job_name'
+   echo '        | job_ID | "job_ID[index_list]"] [-h | -V] [-n lines]'
+   echo
+   echo 'Finding the last n lines of the outputs of `bpeek`.'
+   echo 
+   echo '   -n N,           prints the last N lines instead of the last 10.'
+   echo '   -f,             displays the output of the job using the command'
+   echo '                     tail -f.'
+   echo '   -q queue_name,  operates on your most recently submitted job in'
+   echo '                     the specified queue.'
+   echo '   -m host_name,   operates on your most recently submitted job that'
+   echo '                     has been dispatched to the specified host.'
+   echo '   -J job_name,    operates on your most recently submitted job that'
+   echo '                     has the specified job name.'
+   echo '   job_ID | "job_ID[index_list]",'
+   echo '                   operates on the specified job.'
+   echo '   -h,             prints comand usage to stdout and exits.'
+   echo '   -V,             prints btail version to stdout and exits.'
+}
+
+ArgTail=
+ArgBpeek=
+while true; do
+   case "$1" in
+      -n) ArgTail=$1" "$2; shift 2;;
+      -f) ArgBpeek=$ArgBpeek$1" "; shift;;
+      -q) ArgBpeek=$ArgBpeek$1" "$2" "; shift 2;;
+      -m) ArgBpeek=$ArgBpeek$1" "$2" "; shift 2;;
+      -J) ArgBpeek=$ArgBpeek$1" "$2" "; shift 2;;
+      -h) ShowHelp; exit 0;;
+      -V) echo -e "btail Version: 0.1\nJun 26, 2019"; exit 0;;
+      --) shift;ArgBpeek=$ArgBpeek$*; break;;
+   esac
+done
+
+bpeek $ArgBpeek | tail $ArgTail
